@@ -479,74 +479,61 @@ local Toggle = RageTab:CreateToggle({
 
 })
 
-local swastika_enabled = false
-local original_parts = {}
+ocal gun_enabled = false
+local swastika_parts = {}
 local Toggle = RageTab:CreateToggle({
-    Name = "Swastika Form",
+    Name = "Swastika Tool",
     CurrentValue = false,
-    Flag = "SwastikaToggle",
+    Flag = "SwastikaGunToggle",
     Callback = function(Value)
-        swastika_enabled = Value
+        gun_enabled = Value
         local player = game.Players.LocalPlayer
         local character = player.Character
         if not character then return end
-        local humanoidRoot = character:FindFirstChild("HumanoidRootPart")
-        if not humanoidRoot then return end
+        local rightHand = character:FindFirstChild("RightHand")
+        if not rightHand then return end
         if Value then
-            for _, part in pairs(character:GetChildren()) do
-                if part:IsA("BasePart") and part.Name ~= "HumanoidRootPart" then
-                    original_parts[part.Name] = part.CFrame
-                    part:Destroy()
-                end
-            end
             local positions = {
-                Vector3.new(0, 0, 0),
-                Vector3.new(1.5, 0, 0),
-                Vector3.new(-1.5, 0, 0),
-                Vector3.new(0, 1.5, 0),
-                Vector3.new(0, -1.5, 0),
-                Vector3.new(1.5, 1.5, 0),
-                Vector3.new(-1.5, -1.5, 0),
-                Vector3.new(1.5, -1.5, 0),
-                Vector3.new(-1.5, 1.5, 0)
+                CFrame.new(0, 0, 0),
+                CFrame.new(0.5, 0, 0),
+                CFrame.new(-0.5, 0, 0),
+                CFrame.new(0, 0.5, 0),
+                CFrame.new(0, -0.5, 0),
+                CFrame.new(0.5, 0.5, 0),
+                CFrame.new(-0.5, -0.5, 0),
+                CFrame.new(0.5, -0.5, 0),
+                CFrame.new(-0.5, 0.5, 0)
             }
-            local part_names = {"Head", "Left Arm", "Right Arm", "Left Leg", "Right Leg", "Torso1", "Torso2", "Torso3", "Torso4"}
-            for i = 1, math.min(#positions, #part_names) do
-                local existing_part = character:FindFirstChild(part_names[i])
-                if existing_part then
-                    existing_part.CFrame = humanoidRoot.CFrame * CFrame.new(positions[i])
-                else
-                    local new_part = Instance.new("Part")
-                    new_part.Name = part_names[i]
-                    new_part.Size = Vector3.new(1, 1, 1)
-                    new_part.Color = Color3.new(0, 0, 0)
-                    new_part.Material = Enum.Material.SmoothPlastic
-                    new_part.Anchored = true
-                    new_part.CanCollide = false
-                    new_part.CFrame = humanoidRoot.CFrame * CFrame.new(positions[i])
-                    new_part.Parent = character
-                end
+            for i = 1, 9 do
+                local part = Instance.new("Part")
+                part.Name = "SwastikaPart" .. i
+                part.Size = Vector3.new(0.3, 0.3, 0.3)
+                part.Color = Color3.new(0, 0, 0)
+                part.Material = Enum.Material.SmoothPlastic
+                part.CanCollide = false
+                part.Anchored = false
+                part.CFrame = rightHand.CFrame * positions[i]
+                part.Parent = character
+                table.insert(swastika_parts, part)
             end
             spawn(function()
-                while swastika_enabled and character and character.Parent do
-                    task.wait(0.1)
-                    if not character:FindFirstChild("HumanoidRootPart") then break end
-                    for j = 1, math.min(#positions, #part_names) do
-                        local part = character:FindFirstChild(part_names[j])
-                        if part then
-                            part.CFrame = character.HumanoidRootPart.CFrame * CFrame.new(positions[j])
+                while gun_enabled and character and character.Parent do
+                    task.wait(0.01)
+                    if not character:FindFirstChild("RightHand") then break end
+                    for j = 1, #swastika_parts do
+                        if swastika_parts[j] and swastika_parts[j]:IsDescendantOf(game) then
+                            swastika_parts[j].CFrame = character.RightHand.CFrame * positions[j]
                         end
                     end
                 end
             end)
         else
-            for part_name, cframe in pairs(original_parts) do
-                local existing_part = character:FindFirstChild(part_name)
-                if existing_part then
-                    existing_part.CFrame = cframe
+            for _, part in pairs(swastika_parts) do
+                if part and part.Parent then
+                    part:Destroy()
                 end
             end
-            original_parts = {}
+            swastika_parts = {}
         end
     end
 })
