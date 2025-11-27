@@ -479,65 +479,77 @@ local Toggle = RageTab:CreateToggle({
 
 })
 
-local Button = RageTab:CreateButton({
-    Name = "Enable Swastika Form",
-    Callback = function()
-        local player = game.Players.LocalPlayer
-        local character = player.Character
-        if character and character:FindFirstChild("Humanoid") and character:FindFirstChild("HumanoidRootPart") then
-            character.Humanoid.Archivable = true
-            local newHumanoid = character.Humanoid:Clone()
-            character.Humanoid:Destroy()
-            newHumanoid.Parent = character
-            for _, v in pairs(character:GetChildren()) do
-                if v:IsA("BasePart") and v.Name ~= "HumanoidRootPart" then
-                    v:Destroy()
+local swastika_enabled = false
+local swastika_parts = {}
+local Toggle = RageTab:CreateToggle({
+    Name = "Swastika Form",
+    CurrentValue = false,
+    Flag = "SwastikaToggle",
+    Callback = function(Value)
+        swastika_enabled = Value
+        if Value then
+            local player = game.Players.LocalPlayer
+            local character = player.Character
+            if not character then return end
+            local humanoidRoot = character:FindFirstChild("HumanoidRootPart")
+            if not humanoidRoot then return end
+            for _, part in pairs(character:GetChildren()) do
+                if part:IsA("BasePart") and part.Name ~= "HumanoidRootPart" then
+                    part:Destroy()
                 end
             end
-            local colors = {Color3.fromRGB(0, 0, 0), Color3.fromRGB(255, 255, 255)}
             local positions = {
-                Vector3.new(0, 0, 0),
-                Vector3.new(2, 0, 0),
-                Vector3.new(-2, 0, 0),
-                Vector3.new(0, 2, 0),
-                Vector3.new(0, -2, 0),
-                Vector3.new(2, 2, 0),
-                Vector3.new(-2, -2, 0),
-                Vector3.new(2, -2, 0),
-                Vector3.new(-2, 2, 0)
+                CFrame.new(0, 0, 0),
+                CFrame.new(1.5, 0, 0),
+                CFrame.new(-1.5, 0, 0),
+                CFrame.new(0, 1.5, 0),
+                CFrame.new(0, -1.5, 0),
+                CFrame.new(1.5, 1.5, 0),
+                CFrame.new(-1.5, -1.5, 0),
+                CFrame.new(1.5, -1.5, 0),
+                CFrame.new(-1.5, 1.5, 0)
             }
-            for i = 1, 9 do
+            local sizes = {
+                Vector3.new(1, 0.2, 0.2),
+                Vector3.new(1, 0.2, 0.2),
+                Vector3.new(1, 0.2, 0.2),
+                Vector3.new(0.2, 1, 0.2),
+                Vector3.new(0.2, 1, 0.2),
+                Vector3.new(0.2, 1.5, 0.2),
+                Vector3.new(0.2, 1.5, 0.2),
+                Vector3.new(1.5, 0.2, 0.2),
+                Vector3.new(1.5, 0.2, 0.2)
+            }
+            for i = 1, #positions do
                 local part = Instance.new("Part")
                 part.Name = "SwastikaPart" .. i
-                part.Size = Vector3.new(1, 1, 1)
+                part.Size = sizes[i]
+                part.Color = Color3.new(0, 0, 0)
                 part.Material = Enum.Material.SmoothPlastic
-                part.Color = colors[1]
-                part.CanCollide = false
                 part.Anchored = true
-                part.CFrame = character.HumanoidRootPart.CFrame * CFrame.new(positions[i])
+                part.CanCollide = false
+                part.CFrame = humanoidRoot.CFrame * positions[i]
                 part.Parent = character
+                table.insert(swastika_parts, part)
             end
-        end
-    end
-})
-local Button = RageTab:CreateButton({
-    Name = "Disable Swastika Form",
-    Callback = function()
-        local player = game.Players.LocalPlayer
-        local character = player.Character
-        if character then
-            for _, v in pairs(character:GetChildren()) do
-                if v.Name:sub(1, 9) == "SwastikaP" then
-                    v:Destroy()
-                end
-            end
-            if character:FindFirstChild("R6") or character:FindFirstChild("R15") then
-                for _, v in pairs(character:GetChildren()) do
-                    if v:IsA("BasePart") and v.Name ~= "HumanoidRootPart" then
-                        v:Destroy()
+            spawn(function()
+                while swastika_enabled and character and character.Parent do
+                    task.wait(0.1)
+                    if not character:FindFirstChild("HumanoidRootPart") then break end
+                    for j = 1, #swastika_parts do
+                        if swastika_parts[j] and swastika_parts[j]:IsDescendantOf(game) then
+                            swastika_parts[j].CFrame = character.HumanoidRootPart.CFrame * positions[j]
+                        end
                     end
                 end
+            end)
+        else
+            for _, part in pairs(swastika_parts) do
+                if part and part.Parent then
+                    part:Destroy()
+                end
             end
+            swastika_parts = {}
         end
     end
 })
