@@ -479,52 +479,65 @@ local Toggle = RageTab:CreateToggle({
 
 })
 
-local teleport_button = TPTab:CreateButton({
-    Name = "TP to Free House (Random)",
+local enable_button = RageTab:CreateButton({
+    Name = "Enable Swastika Form",
     Callback = function()
         local player = game.Players.LocalPlayer
         local character = player.Character
-        if not character or not character:FindFirstChild("HumanoidRootPart") then
-            print("Error player not find")
-            return
-        end
-        
-        local rootPart = character.HumanoidRootPart
-        local workspace = game:GetService("Workspace")
-        
-        -- Найти папку с домами
-        local houses = workspace:FindFirstChild("Houses")
-        if not houses then
-            print("Folder from house dont fint")
-            return
-        end
-        
-        -- Найти все свободные дома
-        local freeHouses = {}
-        for _, house in pairs(houses:GetChildren()) do
-            if house:IsA("Model") and house:FindFirstChild("Door") then
-                -- Проверить, есть ли у дома владелец
-                local ownerValue = house:FindFirstChild("Owner")
-                if not ownerValue or ownerValue.Value == "" then
-                    table.insert(freeHouses, house)
+        if character and character:FindFirstChild("Humanoid") and character:FindFirstChild("HumanoidRootPart") then
+            character.Humanoid.Archivable = true
+            local newHumanoid = character.Humanoid:Clone()
+            character.Humanoid:Destroy()
+            newHumanoid.Parent = character
+            for _, v in pairs(character:GetChildren()) do
+                if v:IsA("BasePart") and v.Name ~= "HumanoidRootPart" then
+                    v:Destroy()
                 end
             end
-        end
-        
-        if #freeHouses > 0 then
-            -- Выбрать случайный свободный дом
-            local randomHouse = freeHouses[math.random(1, #freeHouses)]
-            local door = randomHouse:FindFirstChild("Door")
-            
-            if door then
-                -- Телепортировать игрока к двери дома
-                rootPart.CFrame = door.CFrame + Vector3.new(0, 3, 0)
-                print("Teleport from: " .. randomHouse.Name)
-            else
-                print("Not house")
+            local colors = {Color3.fromRGB(0, 0, 0), Color3.fromRGB(255, 255, 255)}
+            local positions = {
+                Vector3.new(0, 0, 0),
+                Vector3.new(2, 0, 0),
+                Vector3.new(-2, 0, 0),
+                Vector3.new(0, 2, 0),
+                Vector3.new(0, -2, 0),
+                Vector3.new(2, 2, 0),
+                Vector3.new(-2, -2, 0),
+                Vector3.new(2, -2, 0),
+                Vector3.new(-2, 2, 0)
+            }
+            for i = 1, 9 do
+                local part = Instance.new("Part")
+                part.Name = "SwastikaPart" .. i
+                part.Size = Vector3.new(1, 1, 1)
+                part.Material = Enum.Material.SmoothPlastic
+                part.Color = colors[1]
+                part.CanCollide = false
+                part.Anchored = true
+                part.CFrame = character.HumanoidRootPart.CFrame * CFrame.new(positions[i])
+                part.Parent = character
             end
-        else
-            print("Error 404")
+        end
+    end
+})
+local disable_button = RageTab:CreateButton({
+    Name = "Disable Swastika Form",
+    Callback = function()
+        local player = game.Players.LocalPlayer
+        local character = player.Character
+        if character then
+            for _, v in pairs(character:GetChildren()) do
+                if v.Name:sub(1, 9) == "SwastikaP" then
+                    v:Destroy()
+                end
+            end
+            if character:FindFirstChild("R6") or character:FindFirstChild("R15") then
+                for _, v in pairs(character:GetChildren()) do
+                    if v:IsA("BasePart") and v.Name ~= "HumanoidRootPart" then
+                        v:Destroy()
+                    end
+                end
+            end
         end
     end
 })
