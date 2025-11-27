@@ -492,61 +492,9 @@ local Toggle = RageTab:CreateToggle({
 
 })
 
-local gun_enabled = false
-local swastika_parts = {}
-local Toggle = RageTab:CreateToggle({
-    Name = "Swastika Tool",
-    CurrentValue = false,
-    Flag = "SwastikaGunToggle",
-    Callback = function(Value)
-        gun_enabled = Value
-        local player = Players.LocalPlayer
-        local character = player.Character
-        if not character then return end
-        local rightHand = character:FindFirstChild("RightHand")
-        if not rightHand then return end
-        if Value then
-            local positions = {
-                CFrame.new(0, 0, 0),
-                CFrame.new(0.5, 0, 0),
-                CFrame.new(-0.5, 0, 0),
-                CFrame.new(0, 0.5, 0),
-                CFrame.new(0, -0.5, 0),
-                CFrame.new(0.5, 0.5, 0),
-                CFrame.new(-0.5, -0.5, 0),
-                CFrame.new(0.5, -0.5, 0),
-                CFrame.new(-0.5, 0.5, 0)
-            }
-            for i = 1, 9 do
-                local part = Instance.new("Part")
-                part.Name = "SwastikaPart" .. i
-                part.Size = Vector3.new(0.3, 0.3, 0.3)
-                part.Color = Color3.new(0, 0, 0)
-                part.Material = Enum.Material.SmoothPlastic
-                part.CanCollide = false
-                part.Anchored = false
-                part.CFrame = rightHand.CFrame * positions[i]
-                part.Parent = character
-                table.insert(swastika_parts, part)
-            end
-            spawn(function()
-                while gun_enabled and character and character.Parent do
-                    task.wait(0.01)
-                    if not character:FindFirstChild("RightHand") then break end
-                    for j = 1, #swastika_parts do
-                        if swastika_parts[j] and swastika_parts[j]:IsDescendantOf(game) then
-                            swastika_parts[j].CFrame = character.RightHand.CFrame * positions[j]
-                        end
-                    end
-                end
-            end)
-        else
-            for _, part in pairs(swastika_parts) do
-                if part and part.Parent then
-                    part:Destroy()
-                end
-            end
-            swastika_parts = {}
-        end
+local Button = Tab:CreateButton({
+    Name = "!ez",
+    Callback = function()
+        game:GetService("ReplicatedStorage"):WaitForChild("DefaultChatSystemChatEvents"):WaitForChild("SayMessageRequest"):FireServer("ez", "All")
     end
 })
