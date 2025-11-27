@@ -479,7 +479,7 @@ local Toggle = RageTab:CreateToggle({
 
 })
 
-local enable_button = RageTab:CreateButton({
+local Button = RageTab:CreateButton({
     Name = "Enable Swastika Form",
     Callback = function()
         local player = game.Players.LocalPlayer
@@ -520,7 +520,7 @@ local enable_button = RageTab:CreateButton({
         end
     end
 })
-local disable_button = RageTab:CreateButton({
+local Button = RageTab:CreateButton({
     Name = "Disable Swastika Form",
     Callback = function()
         local player = game.Players.LocalPlayer
