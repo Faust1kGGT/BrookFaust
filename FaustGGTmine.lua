@@ -148,7 +148,7 @@ local Button3 = Tab:CreateButton({
         if #turkey_list == 0 then
             is_moving = false
             return end
-        local player = game.Players.LocalPlayer
+        local player = Players.LocalPlayer
         local character = player.Character
         if not character or not character:FindFirstChild("HumanoidRootPart") then
             is_moving = false
