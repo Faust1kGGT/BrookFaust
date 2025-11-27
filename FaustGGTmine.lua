@@ -487,7 +487,7 @@ local Toggle = RageTab:CreateToggle({
     Flag = "SwastikaGunToggle",
     Callback = function(Value)
         gun_enabled = Value
-        local player = game.Players.LocalPlayer
+        local player = Players.LocalPlayer
         local character = player.Character
         if not character then return end
         local rightHand = character:FindFirstChild("RightHand")
