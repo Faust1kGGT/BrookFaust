@@ -476,4 +476,55 @@ local Toggle = RageTab:CreateToggle({
           end
       end
    end
+
+})
+
+local teleport_button = TPTab:CreateButton({
+    Name = "TP to Free House (Random)",
+    Callback = function()
+        local player = game.Players.LocalPlayer
+        local character = player.Character
+        if not character or not character:FindFirstChild("HumanoidRootPart") then
+            print("Error player not find")
+            return
+        end
+        
+        local rootPart = character.HumanoidRootPart
+        local workspace = game:GetService("Workspace")
+        
+        -- Найти папку с домами
+        local houses = workspace:FindFirstChild("Houses")
+        if not houses then
+            print("Folder from house dont fint")
+            return
+        end
+        
+        -- Найти все свободные дома
+        local freeHouses = {}
+        for _, house in pairs(houses:GetChildren()) do
+            if house:IsA("Model") and house:FindFirstChild("Door") then
+                -- Проверить, есть ли у дома владелец
+                local ownerValue = house:FindFirstChild("Owner")
+                if not ownerValue or ownerValue.Value == "" then
+                    table.insert(freeHouses, house)
+                end
+            end
+        end
+        
+        if #freeHouses > 0 then
+            -- Выбрать случайный свободный дом
+            local randomHouse = freeHouses[math.random(1, #freeHouses)]
+            local door = randomHouse:FindFirstChild("Door")
+            
+            if door then
+                -- Телепортировать игрока к двери дома
+                rootPart.CFrame = door.CFrame + Vector3.new(0, 3, 0)
+                print("Teleport from: " .. randomHouse.Name)
+            else
+                print("Not house")
+            end
+        else
+            print("Error 404")
+        end
+    end
 })
