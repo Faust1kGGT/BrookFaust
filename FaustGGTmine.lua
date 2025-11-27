@@ -125,57 +125,70 @@ removeNoCarsRegionsForLocalPlayer()
    end,
 })
 
+local turkey_list = {}
+local current_index = 1
+local is_moving = false
+local tween_service = game:GetService("TweenService")
+
 local Button3 = Tab:CreateButton({
    Name = "Teleport all Turkeys",
    Callback = function()
-   -- Скрипт для телепортации индеек к игроку
-local Players = game:GetService("Players")
-local Workspace = game:GetService("Workspace")
-
-local player = Players.LocalPlayer
-
-local function teleportTurkeysToPlayer()
-    local turkeysFolder = Workspace:FindFirstChild("ThanksgivingTurkeys")
-    
-    if not turkeysFolder then
-        warn("Папка ThanksgivingTurkeys не найдена в Workspace!")
-        return
-    end
-    
-    local character = player.Character
-    if not character then
-        warn("Персонаж игрока не найден!")
-        return
-    end
-    
-    local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
-    if not humanoidRootPart then
-        warn("HumanoidRootPart не найден!")
-        return
-    end
-    
-    for _, turkey in ipairs(turkeysFolder:GetChildren()) do
-        if turkey:IsA("Model") then
-            local primaryPart = turkey.PrimaryPart or turkey:FindFirstChildWhichIsA("BasePart")
-            if primaryPart then
-                -- Телепортируем индейку к игроку со случайным смещением
-                local offset = Vector3.new(
-                    math.random(-5, 5),
-                    0,
-                    math.random(-5, 5)
-                )
-                primaryPart.CFrame = CFrame.new(humanoidRootPart.Position + offset)
-                print("Индейка телепортирована к игроку: " .. turkey.Name)
+        if is_moving then return end
+        is_moving = true
+        turkey_list = {}
+        local workspace = game:GetService("Workspace")
+        local thanksgiving_turkeys = workspace:FindFirstChild("ThanksgivingTurkeys")
+        if thanksgiving_turkeys then
+            for _, part in pairs(thanksgiving_turkeys:GetChildren()) do
+                if part:IsA("BasePart") then
+                    table.insert(turkey_list, part)
+                end
             end
         end
+        if #turkey_list == 0 then
+            is_moving = false
+            return end
+        local player = game.Players.LocalPlayer
+        local character = player.Character
+        if not character or not character:FindFirstChild("HumanoidRootPart") then
+            is_moving = false
+            return end
+        local humanoidRoot = character.HumanoidRootPart
+        local connection
+        connection = humanoidRoot.AncestryChanged:Connect(function()
+            if not humanoidRoot.Parent then
+                connection:Disconnect()
+                is_moving = false
+            end
+        end)
+        spawn(function()
+            while is_moving and #turkey_list > 0 do
+                local target = turkey_list[current_index]
+                local target_position = target.Position + Vector3.new(0, 3, 0)
+                local tween_info = TweenInfo.new(
+                    2,
+                    Enum.EasingStyle.Linear,
+                    Enum.EasingDirection.Out,
+                    0,
+                    false,
+                    0
+                )
+                local tween = tween_service:Create(
+                    humanoidRoot,
+                    tween_info,
+                    {CFrame = CFrame.new(target_position)}
+                )
+                tween:Play()
+                tween.Completed:Connect(function()
+                end)
+                task.wait(2.1)
+                current_index = current_index + 1
+                if current_index > #turkey_list then
+                    current_index = 1
+                end
+            end
+        end)
     end
-    
-    print("Все индейки телепортированы к игроку!")
-end
-
--- Запускаем функцию
-teleportTurkeysToPlayer()
-   end,
 })
 
 local TPTab = Window:CreateTab("TP", 4483362458) -- Title, Image
