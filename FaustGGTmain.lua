@@ -479,10 +479,10 @@ local Toggle = RageTab:CreateToggle({
 
 })
 
-ocal gun_enabled = false
+local gun_enabled = false
 local swastika_parts = {}
 local Toggle = RageTab:CreateToggle({
-    Name = "Swastika Tool",
+    Name = "Enable Swastika Gun",
     CurrentValue = false,
     Flag = "SwastikaGunToggle",
     Callback = function(Value)
