@@ -492,9 +492,14 @@ local Toggle = RageTab:CreateToggle({
 
 })
 
-local Button = Tab:CreateButton({
-    Name = "!ez",
+local Button = RageTab:CreateButton({
+    Name = "!so ez!",
     Callback = function()
-        game:GetService("ReplicatedStorage"):WaitForChild("DefaultChatSystemChatEvents"):WaitForChild("SayMessageRequest"):FireServer("ez", "All")
+        local Players = game:GetService("Players")
+        local LocalPlayer = Players.LocalPlayer
+        if LocalPlayer then
+            local ChatService = game:GetService("Chat")
+            ChatService:Chat(LocalPlayer.Character, "ez", Enum.ChatChannel.Public)
+        end
     end
 })
