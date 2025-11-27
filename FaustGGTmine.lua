@@ -430,97 +430,22 @@ end
 local RageTab = Window:CreateTab("Rage", 4483362458) -- Title, Image
 
 -- Переключатель ESP
-local esp_enabled = false
-local connections = {}
-local gui = Instance.new("ScreenGui")
-gui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
-local esp_toggle = RageTab:CreateToggle({
-    Name = "ESP",
-    CurrentValue = false,
-    Flag = "ESPToggle",
-    Callback = function(Value)
-        esp_enabled = Value
-        if Value then
-            spawn(function()
-                while esp_enabled do
-                    for _, player in pairs(game.Players:GetPlayers()) do
-                        if player ~= Players.LocalPlayer then
-                            local character = player.Character
-                            if character and character:FindFirstChild("HumanoidRootPart") then
-                                local head = character:FindFirstChild("Head")
-                                local torso = character:FindFirstChild("UpperTorso") or character:FindFirstChild("Torso")
-                                if head and torso then
-                                    local BillboardGui = Instance.new("BillboardGui")
-                                    BillboardGui.Name = player.Name .. "ESP"
-                                    BillboardGui.Parent = gui
-                                    BillboardGui.AlwaysOnTop = true
-                                    BillboardGui.Size = UDim2.new(0, 200, 0, 50)
-                                    BillboardGui.Adornee = head
-                                    local TextLabel = Instance.new("TextLabel")
-                                    TextLabel.Size = UDim2.new(1, 0, 1, 0)
-                                    TextLabel.Text = player.Name
-                                    TextLabel.TextColor3 = Color3.new(0, 1, 0)
-                                    TextLabel.BackgroundTransparency = 1
-                                    TextLabel.TextStrokeTransparency = 0
-                                    TextLabel.TextStrokeColor3 = Color3.new(0, 0, 0)
-                                    TextLabel.Parent = BillboardGui
-                                    local box = Drawing.new("Square")
-                                    box.Visible = true
-                                    box.Size = Vector2.new(100, 100)
-                                    box.Color = Color3.new(0, 1, 0)
-                                    box.Thickness = 2
-                                    box.Filled = false
-                                    local tracer = Drawing.new("Line")
-                                    tracer.Visible = true
-                                    tracer.Color = Color3.new(0, 1, 0)
-                                    tracer.Thickness = 2
-                                    local skeleton_parts = {}
-                                    local connections_part = {}
-                                    for _, part_name in pairs({"LeftUpperArm", "RightUpperArm", "LeftLowerArm", "RightLowerArm", "LeftUpperLeg", "RightUpperLeg", "LeftLowerLeg", "RightLowerLeg", "UpperTorso", "LowerTorso", "Head"}) do
-                                        local part = character:FindFirstChild(part_name)
-                                        if part then
-                                            local skeleton_line = Drawing.new("Line")
-                                            skeleton_line.Visible = true
-                                            skeleton_line.Color = Color3.new(0, 1, 0)
-                                            skeleton_line.Thickness = 2
-                                            table.insert(skeleton_parts, skeleton_line)
-                                            local connection = part.AncestryChanged:Connect(function()
-                                                if not part.Parent then
-                                                    skeleton_line.Visible = false
-                                                end
-                                            end)
-                                            table.insert(connections_part, connection)
-                                        end
-                                    end
-                                    table.insert(connections, {
-                                        BillboardGui = BillboardGui,
-                                        Box = box,
-                                        Tracer = tracer,
-                                        Skeleton = skeleton_parts,
-                                        Connections = connections_part
-                                    })
-                                end
-                            end
-                        end
-                    end
-                    task.wait(0.1)
-                end
-            end)
-        else
-            for _, connection_group in pairs(connections) do
-                connection_group.BillboardGui:Destroy()
-                connection_group.Box.Visible = false
-                connection_group.Tracer.Visible = false
-                for _, skeleton_line in pairs(connection_group.Skeleton) do
-                    skeleton_line.Visible = false
-                end
-                for _, conn in pairs(connection_group.Connections) do
-                    conn:Disconnect()
-                end
-            end
-            connections = {}
-        end
-    end
+local Toggle = RageTab:CreateToggle({
+   Name = "ESP Toggle",
+   CurrentValue = false,
+   Flag = "ESPToggle",
+   Callback = function(Value)
+      ESPEnabled = Value
+      if ESPEnabled then
+          RunService.Heartbeat:Connect(UpdateESP)
+          Camera:GetPropertyChangedSignal("CFrame"):Connect(UpdateESP)
+      else
+          for _, box in pairs(ESPBoxes) do
+              box:Remove()
+          end
+          table.clear(ESPBoxes)
+      end
+   end
 })
 
 local SpinEnabled = false
